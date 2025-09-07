@@ -1,4 +1,4 @@
 
-# NOCTUS-06 Projesi
+# Atmospheric Sensor Code Snippets
 
-Bu depo, kendi yaptığım NOCTUS-06 küp uydu projesinin kodlarını içerir.
+This repository contains a selection of the code I used in my self-developed CubeSat projects.
