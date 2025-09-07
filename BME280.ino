@@ -21,26 +21,16 @@ void setup() {
 }
 
 void loop() {
-
   // Sensörden sıcaklık, basınç ve nem verilerini okuması için kodu yazıyoruz.
   float temperature = bme.readTemperature();
   float pressure = bme.readPressure() / 100.0F; // Basınç hPa olarak
   float humidity = bme.readHumidity();
   
  // Seri monitörde verileri göster 
-  Serial.print("Sıcaklık: ");
   Serial.print(temperature);
-  Serial.println(" °C");
-
-  Serial.print("Basınç: ");
   Serial.print(pressure);
-  Serial.println(" hPa");
-
-  Serial.print("Nem: ");
   Serial.print(humidity);
-  Serial.println(" %");
 
-  Serial.println("-----------------------------------------------");
   // 2 saniye bekle
   delay(2000);
 }
