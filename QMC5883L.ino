@@ -1,22 +1,22 @@
 #include <Wire.h>
-#include <QMC5883LCompass.h> //Burada HMC5883L'nin klon modelini kullandığımız için bu kütüphaneyi yüklememiz gerekiyor..
+#include <QMC5883LCompass.h> //We need to upload this library because we're using the clone model of the HMC5883L here ..
 
 QMC5883LCompass compass;
 
 void setup() {
   Serial.begin(9600);
   Wire.begin();
-  compass.init();  // Sensörü başlat ..
+  compass.init();  // Initialize the sensor ..
 }
 
 void loop() {
   int x, y, z;
   float heading;
 
-  // Sensörden X, Y, Z ve heading verilerini okutuyoruz..
+  //We're reading X, Y, Z, and heading data from the sensor..
   compass.read();
   
-  // X, Y, Z ve heading verilerini almak için kullandığımız tanımlamalar..
+  // The definitions we use to get X, Y, Z, and heading data.
   x = compass.getX();
   y = compass.getY();
   z = compass.getZ();
@@ -26,10 +26,10 @@ if (heading < 0) {
   heading+=360;
 }
 
-  // Seri monitörde verileri yazdırıyoruz..
+  // We're printing the data to the serial monitor.
   Serial.print(x);
   Serial.print(y);
   Serial.println(z);
   Serial.println(heading);
-  delay(1000);
+  delay(1000); // data measuring range ...
 }
