@@ -1,93 +1,92 @@
-#include <TinyGPS++.h>
+#include <TinyGPSPlus.h>
 #include <SoftwareSerial.h>
 
-// TinyGPS++ nesnesini ekledik
+// GPS object
 TinyGPSPlus gps;
 
-// Seri port tanımlamaları
-#define GPS_SERIAL Serial1 // GPS modülü 
-#define PC_SERIAL Serial   // Bilgisayarla iletişim (USB üzerinden)
+#define GPS_SERIAL Serial2 // GPS module ..
+#define PC_SERIAL Serial // Communication with the computer (via USB) ..
 
-// Değişkenler
-unsigned long lastUpdateTime = 0; // Zamanlayıcı (bilgi akışı için için)
+unsigned long lastUpdateTime = 0;
+const unsigned long UPDATE_INTERVAL = 5000;
 
-void setup() {   //Burada 2 farklı seri bağlantı balatıyoruz ..
-  // Seri bağlantıları başlat
-  PC_SERIAL.begin(9600);       // Bilgisayara bilgi göndermek için
-  GPS_SERIAL.begin(9600);      // GPS modülüyle iletişim için
-  PC_SERIAL.println("Sistem başlatılıyor...");
-  PC_SERIAL.println("GPS modülü ile bağlantı kuruluyor...");
-  delay(2000); // Başlangıç için kısa bir bekleme süresi
+void setup() {
+  PC_SERIAL.begin(9600); //To send data to the computer ..
+  GPS_SERIAL.begin(9600); // For communication with the GPS module ..
+  PC_SERIAL.println("System is starting...");
+  delay(2000);
 }
 
 void loop() {
-  // GPS'ten veri okuma
+// Reading data from the GPS ..
   while (GPS_SERIAL.available() > 0) {
-    char c = GPS_SERIAL.read(); // Seri porttan bir karakter oku
-    if (gps.encode(c)) {        // GPS verilerini çözümle
-      displayGPSData();         // Çözümlemeden sonra bilgileri göster
-    }
+    gps.encode(GPS_SERIAL.read()); // Process GPS data..
   }
 
-  // Her 5 saniyede bir durum bilgisi göster
-  if (millis() - lastUpdateTime > 5000) {
-    showStatus();
+  if (millis() - lastUpdateTime > UPDATE_INTERVAL) {
+    displayGPSData();
     lastUpdateTime = millis();
   }
 }
 
-// GPS verilerini seri monitörde göster
 void displayGPSData() {
-  PC_SERIAL.println("---------- GPS Verileri ----------");
-  
+  PC_SERIAL.println("---------- GPS Data ----------");
+
+  // Location data
   if (gps.location.isValid()) {
-    PC_SERIAL.print("Enlem: ");
-    PC_SERIAL.print(gps.location.lat(), 6);
-    PC_SERIAL.print(" | Boylam: ");
-    PC_SERIAL.println(gps.location.lng(), 6);
+    PC_SERIAL.print(" Latitude: "); PC_SERIAL.print(gps.location.lat(), 6);
+    PC_SERIAL.print(" | Longitude: "); PC_SERIAL.println(gps.location.lng(), 6);
   } else {
-    PC_SERIAL.println("Konum bilgisi geçerli değil.");
+    PC_SERIAL.println("Location data is not valid !");
   }
 
+  // Date and Time ...
   if (gps.date.isValid() && gps.time.isValid()) {
-    PC_SERIAL.print("Tarih: ");
-    PC_SERIAL.print(gps.date.day());
-    PC_SERIAL.print("/");
-    PC_SERIAL.print(gps.date.month());
-    PC_SERIAL.print("/");
+    PC_SERIAL.print(" Date: ");
+    PC_SERIAL.print(gps.date.day()); PC_SERIAL.print("/");
+    PC_SERIAL.print(gps.date.month()); PC_SERIAL.print("/");
     PC_SERIAL.println(gps.date.year());
 
-    PC_SERIAL.print("Saat: ");
-    PC_SERIAL.print(gps.time.hour());
-    PC_SERIAL.print(":");
-    PC_SERIAL.print(gps.time.minute());
-    PC_SERIAL.print(":");
+    PC_SERIAL.print(" Time: ");
+    PC_SERIAL.print(gps.time.hour()); PC_SERIAL.print(":");
+    PC_SERIAL.print(gps.time.minute()); PC_SERIAL.print(":");
     PC_SERIAL.println(gps.time.second());
   } else {
-    PC_SERIAL.println("Tarih ve saat bilgisi geçerli değil.");
-  }
-  
-  PC_SERIAL.println("----------------------------------");
-}
-
-// GPS modülü durumu hakkında bilgi ver
-void showStatus() {
-  PC_SERIAL.println("---------- Durum Bilgisi ----------");
-  
-  if (gps.charsProcessed() > 0) {
-    PC_SERIAL.println("GPS verisi alınmaya devam ediyor...");
-    PC_SERIAL.print("Toplam işlenen karakter: ");
-    PC_SERIAL.println(gps.charsProcessed());
-  } else {
-    PC_SERIAL.println("GPS verisi alınamıyor. Lütfen bağlantıları kontrol edin!");
+    PC_SERIAL.println(" Date and time data is not valid ! ");
   }
 
+  // Altitude ..
+  if (gps.altitude.isValid()) {
+    PC_SERIAL.print("Altitude: ");
+    PC_SERIAL.print(gps.altitude.meters());
+    PC_SERIAL.println(" m");
+  }
+
+  // Speed ..
+  if (gps.speed.isValid()) {
+    PC_SERIAL.print("Speed: ");
+    PC_SERIAL.print(gps.speed.kmph());
+    PC_SERIAL.println(" km/s");
+  }
+
+  // Direction ..
+  if (gps.course.isValid()) {
+    PC_SERIAL.print("Direction: ");
+    PC_SERIAL.print(gps.course.deg());
+    PC_SERIAL.println("°");
+  }
+
+  // Number of Satellites ..
   if (gps.satellites.isValid()) {
-    PC_SERIAL.print("Uydu Sayısı: ");
+    PC_SERIAL.print("Number of Satellites: ");
     PC_SERIAL.println(gps.satellites.value());
-  } else {
-    PC_SERIAL.println("Uydu bilgisi alınamadı.");
   }
-  
-  PC_SERIAL.println("----------------------------------");
+
+  // Horizontal Dilution of Precision (HDOP) ..
+  if (gps.hdop.isValid()) {
+    PC_SERIAL.print("📶 HDOP: ");
+    PC_SERIAL.println(gps.hdop.hdop());
+  }
+
+  PC_SERIAL.println("-------------------------------------\n");
 }
